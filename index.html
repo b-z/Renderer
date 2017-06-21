@@ -34,7 +34,7 @@
                         </div>
                         <div class="hvr-bounce-to-right waves-effect waves-light" style="cursor:pointer;">
                             <span>Upload</span>
-                            <input type="file" multiple>
+                            <input id="file_path" type="file" multiple>
                         </div>
                     </div>
                 </div>
@@ -65,6 +65,7 @@
     <script type="text/javascript" src="js/materialize.min.js"></script>
     <script type="text/javascript" src="js/data_structure.js"></script>
     <script type="text/javascript" src="js/ObjParser.js"></script>
+    <script type="text/javascript" src="js/renderer.js"></script>
 
     <script>
         var CANVAS_SIZE = {
@@ -92,7 +93,33 @@
         function resizeInfoContainer() {
             $('#info').height($('#canvas-container').height() - $('#buttons').height());
         }
+
+        function uploadFile(e) {
+            // console.log(e);
+            var file = e.target.files[0];
+			var filename = file.name;
+			var reader = new FileReader();
+			reader.onload = loadfile;
+			reader.readAsText(file);
+        }
+
+        function loadfile(e) {
+            // console.log(e.target);
+            var str = e.target.result;
+            var parser = new ObjParser();
+            var geometry = parser.parse(str);
+            // console.log(geometry);
+
+            var cpos = new Vector3D(0, 0, 5);
+            var clook = new Vector3D(0, 0, 0);
+            var camera = new Camera(cpos, clook);
+
+            render(camera, geometry);
+        }
+
         $(window).resize(resizeInfoContainer);
+
+        $('#file_path')[0].onchange = uploadFile;
     </script>
 </body>
 </html>

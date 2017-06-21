@@ -81,16 +81,17 @@ ObjParser.prototype = {
                 }
             }
             var f = new Face();
-            f[i].a = idx[0];
-            f[i].b = idx[1];
-            f[i].c = idx[2];
+            f.a = idx[0];
+            f.b = idx[1];
+            f.c = idx[2];
             if (n_idx) {
-                f[i].na = vns[n_idx[0]];
-                f[i].nb = vns[n_idx[1]];
-                f[i].nc = vns[n_idx[2]];
+                f.na = vns[n_idx[0]];
+                f.nb = vns[n_idx[1]];
+                f.nc = vns[n_idx[2]];
             }
             geometry.faces.push(f);
         }
+        return geometry;
 
     }
 }

@@ -1,3 +1,8 @@
+/**
+ * @author Zhou Bowei
+ */
+
+
 function Geometry() {
     this.faces = [];
     this.vertices = [];
@@ -29,5 +34,25 @@ function Vector3D(x, y, z) {
 }
 
 Object.assign(Vector3D.prototype, {
+    fromVector: function(n) {
+        this.x = n.x;
+        this.y = n.y;
+        this.z = n.z;
+    }
+});
 
+
+
+function Camera(pos, look) {
+    this.pos = pos;
+    this.look = look;
+}
+
+Object.assign(Camera.prototype, {
+    lookAt: function(p) {
+        this.look.fromVector(p);
+    },
+    setPosition: function(p) {
+        this.pos.fromVector(p);
+    }
 });
