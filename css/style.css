@@ -63,7 +63,7 @@ canvas {
 }
 
 [class^="hvr-"] {
-    margin: .4rem;
+    /*margin: .4rem;*/
     padding: 0.5rem 0;
     width: 8rem;
     text-align: center;
@@ -382,4 +382,9 @@ nav {
     height: 12px;
     width: 12px;
     border-radius: 50%;
+}
+
+.file-path-wrapper {
+    float: left;
+    padding-left: 0!important;
 }

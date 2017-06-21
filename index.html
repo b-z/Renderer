@@ -13,19 +13,14 @@
 </head>
 
 <body>
-    <div class="navbar-fixed">
+    <!-- <div class="navbar-fixed">
         <nav class="teal">
             <div class="nav-wrapper container row">
-                <!-- logo -->
                 <a class="brand-logo">
-                    <!-- <h2> -->
-
-                    <!-- </h2> -->
                 </a>
-
             </div>
         </nav>
-    </div>
+    </div> -->
     <main class="container">
         <div class="row" style="margin-bottom: 0;">
             <div id="canvas-container" class="col s8" style="line-height: 0;padding: 0;position: relative;">
@@ -33,7 +28,15 @@
             </div>
             <div class="col s4">
                 <div id="buttons">
-                    <a id="tilt-mode-btn" class="hvr-bounce-to-right waves-effect waves-light" onclick="">Edit</a>
+                    <div class="file-field input-field">
+                        <div class="file-path-wrapper" style="display:none;">
+                            <input class="file-path validate" type="text" placeholder="Upload files">
+                        </div>
+                        <div class="hvr-bounce-to-right waves-effect waves-light" style="cursor:pointer;">
+                            <span>Upload</span>
+                            <input type="file" multiple>
+                        </div>
+                    </div>
                 </div>
                 <div id="info"></div>
             </div>
@@ -61,6 +64,7 @@
     <script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
     <script type="text/javascript" src="js/materialize.min.js"></script>
     <script type="text/javascript" src="js/data_structure.js"></script>
+    <script type="text/javascript" src="js/ObjParser.js"></script>
 
     <script>
         var CANVAS_SIZE = {
