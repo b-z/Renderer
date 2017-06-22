@@ -111,7 +111,8 @@
 
             var cpos = new Vector3D(0, 0, 5);
             var clook = new Vector3D(0, 0, 0);
-            var camera = new Camera(cpos, clook);
+            var up = new Vector3D(0, 1, 0)
+            var camera = new Camera(cpos, clook, 0.1, 600, up);
 
             render(camera, geometry);
         }

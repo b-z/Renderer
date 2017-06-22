@@ -9,7 +9,12 @@ function Geometry() {
 }
 
 Object.assign(Geometry.prototype, {
-
+    computeFaceCoordinates: function(camera) {
+        var len = this.faces.length;
+        for (var i = 0; i < len; i++) {
+            this.faces.computeCoordinates(camera, this.vertices);
+        }
+    }
 });
 
 function Face() {
@@ -19,12 +24,24 @@ function Face() {
     this.na = new Vector3D();
     this.nb = new Vector3D();
     this.nc = new Vector3D();
+    this.ca = new Vector2D(); // 三个顶点对应的屏幕坐标
+    this.cb = new Vector2D(); //
+    this.cc = new Vector2D(); //
 
     this.normal = new Vector3D();
+
 }
 
 Object.assign(Face.prototype, {
+    computeCoordinates: function(camera, vertices) {
+        var pa = vertices[this.a];
+        var pb = vertices[this.b];
+        var pc = vertices[this.c];
 
+        this.ca.fromVector(realToScreen(camera, pa));
+        this.cb.fromVector(realToScreen(camera, pb));
+        this.cc.fromVector(realToScreen(camera, pc));
+    }
 });
 
 function Vector3D(x, y, z) {
@@ -38,22 +55,126 @@ Object.assign(Vector3D.prototype, {
         this.x = n.x;
         this.y = n.y;
         this.z = n.z;
+    },
+    clone: function() {
+        var v = new Vector3D();
+        v.fromVector(this);
+        return v;
+    },
+    minus: function(v) {
+        this.x -= v.x;
+        this.y -= v.y;
+        this.z -= v.z;
+    },
+    plus: function(v) {
+        this.x += v.x;
+        this.y += v.y;
+        this.z += v.z;
+    },
+    normalize: function() {
+        var t = this.length2();
+        t = Math.sqrt(t);
+        this.x /= t;
+        this.y /= t;
+        this.z /= t;
+    },
+    multiplyScalar: function(s) {
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
+    },
+    multiplyVector: function(v) {
+        return this.x * v.x +
+            this.y * v.y +
+            this.z * v.z;
+    },
+    length2: function() {
+        var t = this.x * this.x + this.y * this.y + this.z * this.z;
+        return t;
+    },
+    cross: function(a, b) {
+        // 把当前向量设置成两个向量的叉积
+        this.x = a.y * b.z - a.z * b.y;
+        this.y = a.z * b.x - a.x * b.z;
+        this.z = a.x * b.y - a.y * b.x;
+    }
+});
+
+function Vector2D(x, y) {
+    this.x = x || 0;
+    this.y = y || 0;
+}
+
+Object.assign(Vector2D.prototype, {
+    fromVector: function(n) {
+        this.x = n.x;
+        this.y = n.y;
+    }
+});
+
+function Plane(a, b, c, d) {
+    // ax+by+cz+d=0
+    this.a = a || 0;
+    this.b = b || 0;
+    this.c = c || 0;
+    this.d = d || 0;
+}
+
+Object.assign(Plane.prototype, {
+    fromPointAndNormal: function(p, n) {
+        this.a = n.x;
+        this.b = n.y;
+        this.c = n.z;
+        this.d = n.x * p.x + n.y * p.y + n.z * p.z;
     }
 });
 
 
 
-function Camera(pos, look) {
+function Camera(pos, look, distance, scale, up) {
+    // 相机位置
+    // 朝向
+    // 像平面距离
+    // 像平面坐标/真实坐标之间的换算比例
     this.pos = pos;
     this.look = look;
+    this.distance = distance;
+    this.scale = scale;
+    this.up = up;
+    this.left = new Vector3D();
+    this.image_plane = new Plane();
+    this.image_center = new Vector3D();
+    this.computeImagePlane();
 }
 
 Object.assign(Camera.prototype, {
     lookAt: function(p) {
         this.look.fromVector(p);
+        this.computeImagePlane();
     },
     setPosition: function(p) {
         this.pos.fromVector(p);
+        this.computeImagePlane();
+    },
+    computeImagePlane: function() {
+        // 计算像平面
+        var n = this.look.clone();
+        n.minus(this.pos);
+        n.normalize();
+
+        var tmp = n.clone();
+        tmp.multiplyScalar(this.up.multiplyVector(n));
+        this.up.minus(tmp);
+        this.up.normalize();
+
+        this.left.cross(this.up, this.look);
+        this.left.normalize();
+
+        var p = this.pos.clone();
+        n.multiplyScalar(this.distance);
+        p.plus(n);
+        this.image_center.fromVector(p);
+        this.image_plane.fromPointAndNormal(p, n);
     }
 });
 
