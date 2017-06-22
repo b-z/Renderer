@@ -78,9 +78,9 @@
             canvas = $canvas[0];
             ctx = canvas.getContext('2d');
 
-            $('body').on('contextmenu', '#canvas', function(e) {
-                return false;
-            });
+            // $('body').on('contextmenu', '#canvas', function(e) {
+            //     return false;
+            // });
             // $('#canvas-container').mouseup(canvasMouseUp);
             // $('#canvas-container').mousemove(canvasMouseMove);
             // $('#canvas-container').mouseout(canvasMouseOut);
@@ -96,10 +96,10 @@
         function uploadFile(e) {
             // console.log(e);
             var file = e.target.files[0];
-			var filename = file.name;
-			var reader = new FileReader();
-			reader.onload = loadfile;
-			reader.readAsText(file);
+            var filename = file.name;
+            var reader = new FileReader();
+            reader.onload = loadfile;
+            reader.readAsText(file);
         }
 
         function loadfile(e) {
@@ -109,12 +109,13 @@
             var geometry = parser.parse(str);
             // console.log(geometry);
 
-            var cpos = new Vector3D(0, 0, 5);
+            var cpos = new Vector3D(0, 0, 100);
             var clook = new Vector3D(0, 0, 0);
             var up = new Vector3D(0, 1, 0)
-            var camera = new Camera(cpos, clook, 0.1, 600, up);
+            var scale = 15;
+            var camera = new Camera(cpos, clook, 0.1, scale, up);
 
-            render(camera, geometry);
+            render(camera, geometry, ctx);
         }
 
         $(window).resize(resizeInfoContainer);
@@ -122,4 +123,5 @@
         $('#file_path')[0].onchange = uploadFile;
     </script>
 </body>
+
 </html>

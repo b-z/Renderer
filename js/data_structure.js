@@ -12,7 +12,13 @@ Object.assign(Geometry.prototype, {
     computeFaceCoordinates: function(camera) {
         var len = this.faces.length;
         for (var i = 0; i < len; i++) {
-            this.faces.computeCoordinates(camera, this.vertices);
+            this.faces[i].computeCoordinates(camera, this.vertices);
+        }
+    },
+    testDraw: function(camera, context) {
+        var len = this.faces.length;
+        for (var i = 0; i < len; i++) {
+            this.faces[i].testDraw(camera, context, this.vertices);
         }
     }
 });
@@ -41,6 +47,18 @@ Object.assign(Face.prototype, {
         this.ca.fromVector(realToScreen(camera, pa));
         this.cb.fromVector(realToScreen(camera, pb));
         this.cc.fromVector(realToScreen(camera, pc));
+    },
+    testDraw: function(camera, context, vertices) {
+        context.save();
+        context.lineWidth = 1;
+        context.strokeStyle = 'black';
+        context.beginPath();
+        context.moveTo(this.ca.x, this.ca.y);
+        context.lineTo(this.cb.x, this.cb.y);
+        context.lineTo(this.cc.x, this.cc.y);
+        context.lineTo(this.ca.x, this.ca.y);
+        context.stroke();
+        context.restore();
     }
 });
 
@@ -140,6 +158,7 @@ function Camera(pos, look, distance, scale, up) {
     this.look = look;
     this.distance = distance;
     this.scale = scale;
+    this.normal = new Vector3D();
     this.up = up;
     this.left = new Vector3D();
     this.image_plane = new Plane();
@@ -162,12 +181,14 @@ Object.assign(Camera.prototype, {
         n.minus(this.pos);
         n.normalize();
 
+        this.normal.fromVector(n);
+
         var tmp = n.clone();
         tmp.multiplyScalar(this.up.multiplyVector(n));
         this.up.minus(tmp);
         this.up.normalize();
 
-        this.left.cross(this.up, this.look);
+        this.left.cross(this.up, this.normal);
         this.left.normalize();
 
         var p = this.pos.clone();
@@ -175,6 +196,7 @@ Object.assign(Camera.prototype, {
         p.plus(n);
         this.image_center.fromVector(p);
         this.image_plane.fromPointAndNormal(p, n);
+        // console.log(this);
     }
 });
 
