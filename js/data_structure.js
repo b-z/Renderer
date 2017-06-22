@@ -56,3 +56,24 @@ Object.assign(Camera.prototype, {
         this.pos.fromVector(p);
     }
 });
+
+function Matrix(nx, ny, init) {
+    this.data = [];
+    for (var i = 0; i < nx; i++) {
+        var tmp = [];
+        for (var j = 0; j < ny; j++) {
+            tmp.push(init);
+        }
+        this.data.push(tmp);
+    }
+}
+
+Object.assign(Matrix.prototype, {
+
+});
+
+function Color(r, g, b) {
+    this.r = r || 0;
+    this.g = g || 0;
+    this.b = b || 0;
+}

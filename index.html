@@ -24,7 +24,7 @@
     <main class="container">
         <div class="row" style="margin-bottom: 0;">
             <div id="canvas-container" class="col s8" style="line-height: 0;padding: 0;position: relative;">
-                <canvas id="canvas" width="2000px" height="2000px"></canvas>
+                <canvas id="canvas" width="600px" height="600px"></canvas>
             </div>
             <div class="col s4">
                 <div id="buttons">
@@ -68,11 +68,10 @@
     <script type="text/javascript" src="js/renderer.js"></script>
 
     <script>
-        var CANVAS_SIZE = {
-            width: 2000,
-            height: 2000
+        var SIZE = {
+            width: 600,
+            height: 600
         };
-        var CANVAS_SCALE = CANVAS_SIZE.height / 2000 * 5;
         var ctx, $canvas, canvas;
         $(document).ready(function() {
             $canvas = $('#canvas');
