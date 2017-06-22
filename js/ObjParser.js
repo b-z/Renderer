@@ -89,6 +89,17 @@ ObjParser.prototype = {
                 f.nb = vns[n_idx[1]];
                 f.nc = vns[n_idx[2]];
             }
+
+            var a = geometry.vertices[f.a].clone();
+            var b = geometry.vertices[f.b].clone();
+            var c = geometry.vertices[f.c].clone();
+
+            a.minus(b);
+            c.minus(b);
+            b.cross(a, c);
+            b.normalize();
+            f.normal.fromVector(b);
+            f.geometry = geometry;
             geometry.faces.push(f);
         }
         return geometry;

@@ -8,7 +8,21 @@
     <link type="text/css" rel="stylesheet" href="css/style.css" media="screen,projection" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+        .input-field {
+            margin-top: 0;
+        }
 
+        form p {
+            margin-bottom: 0!important;
+        }
+
+        form .row {
+            margin-bottom: 0!important;
+        }
+
+        form input[type=text] {
+            margin-bottom: 3px!important;
+        }
     </style>
 </head>
 
@@ -34,11 +48,100 @@
                         </div>
                         <div class="hvr-bounce-to-right waves-effect waves-light" style="cursor:pointer;">
                             <span>Upload</span>
-                            <input id="file_path" type="file" multiple>
+                            <input id="file_path" type="file">
                         </div>
+                        <div class="hvr-bounce-to-right waves-effect waves-light" style="cursor:pointer;" onclick="updateCamera();render(cam, geometries, ctx);">
+                            Rerender
+                        </div>
+
                     </div>
                 </div>
-                <div id="info"></div>
+                <div id="info" class="row">
+                    <form class="col s12">
+                        <p>
+                            <input name="group1" type="radio" id="perspective" checked />
+                            <label for="perspective">perspective</label>
+                        </p>
+                        <p>
+                            <input name="group1" type="radio" id="orthographic" />
+                            <label for="orthographic">orthographic</label>
+                        </p>
+                        <div class="divider"></div>
+                        <p>
+                            <input name="group2" type="radio" id="wireframe" checked />
+                            <label for="wireframe">wireframe</label>
+                        </p>
+                        <p>
+                            <input name="group2" type="radio" id="raster" />
+                            <label for="raster">raster</label>
+                        </p>
+                        <p>
+                            <input name="group2" type="radio" id="raytracing" />
+                            <label for="raytracing">raytracing</label>
+                        </p>
+                        <div class="divider"></div>
+                        <p>相机坐标</p>
+                        <div class="row">
+                            <div class="input-field col s4">
+                                <input id="camera_x" type="text" value="40">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="camera_y" type="text" value="0">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="camera_z" type="text" value="40">
+                            </div>
+                        </div>
+                        <p>看哪个点</p>
+                        <div class="row">
+                            <div class="input-field col s4">
+                                <input id="look_x" type="text" value="0">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="look_y" type="text" value="5">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="look_z" type="text" value="0">
+                            </div>
+                        </div>
+                        <p>相机up方向</p>
+                        <div class="row">
+                            <div class="input-field col s4">
+                                <input id="up_x" type="text" value="0">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="up_y" type="text" value="1">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="up_z" type="text" value="0">
+                            </div>
+                        </div>
+                        <p>光源坐标</p>
+                        <div class="row">
+                            <div class="input-field col s4">
+                                <input id="light_x" type="text" value="400">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="light_y" type="text" value="400">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="light_z" type="text" value="400">
+                            </div>
+                        </div>
+                        <p>缩放</p>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="scale" type="text" value="15">
+                            </div>
+                        </div>
+                        <p>像平面距离</p>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="distance" type="text" value="0.1">
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
@@ -72,22 +175,26 @@
             width: 600,
             height: 600
         };
-        var ctx, $canvas, canvas;
+        var ctx, $canvas, canvas, geometries, cam, light;
         $(document).ready(function() {
             $canvas = $('#canvas');
             canvas = $canvas[0];
             ctx = canvas.getContext('2d');
-
-            // $('body').on('contextmenu', '#canvas', function(e) {
-            //     return false;
-            // });
-            // $('#canvas-container').mouseup(canvasMouseUp);
-            // $('#canvas-container').mousemove(canvasMouseMove);
-            // $('#canvas-container').mouseout(canvasMouseOut);
-            // $(window).keyup(keyEvent);
-
             resizeInfoContainer();
+
+            resetAll();
         });
+
+        function resetAll() {
+            ctx.save();
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, SIZE.width, SIZE.height);
+            ctx.restore();
+
+            geometries = [];
+            cam = new Camera();
+            light = new Light();
+        }
 
         function resizeInfoContainer() {
             $('#info').height($('#canvas-container').height() - $('#buttons').height());
@@ -96,6 +203,7 @@
         function uploadFile(e) {
             // console.log(e);
             var file = e.target.files[0];
+            if (file == undefined) return;
             var filename = file.name;
             var reader = new FileReader();
             reader.onload = loadfile;
@@ -108,14 +216,9 @@
             var parser = new ObjParser();
             var geometry = parser.parse(str);
             // console.log(geometry);
-
-            var cpos = new Vector3D(0, 0, 100);
-            var clook = new Vector3D(0, 0, 0);
-            var up = new Vector3D(0, 1, 0)
-            var scale = 15;
-            var camera = new Camera(cpos, clook, 0.1, scale, up);
-
-            render(camera, geometry, ctx);
+            geometries.push(geometry);
+            updateCamera();
+            render(cam, geometries, ctx);
         }
 
         $(window).resize(resizeInfoContainer);
