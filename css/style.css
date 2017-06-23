@@ -31,7 +31,7 @@ body {
     display: flex;
     min-height: 100vh;
     flex-direction: column;
-    background-color: #FAFAFA!important;
+    background-image: url(../img/bg.gif);
 }
 
 main {
@@ -55,7 +55,7 @@ canvas {
 }
 
 #canvas {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
 .hvr-bounce-to-right.active, .hvr-bounce-to-right:focus, .hvr-bounce-to-right:hover {

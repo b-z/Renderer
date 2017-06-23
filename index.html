@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title></title>
+    <title>A Renderer</title>
     <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
     <!-- <link type="text/css" rel="stylesheet" href="css/hover-min.css" media="screen,projection" /> -->
     <link type="text/css" rel="stylesheet" href="css/style.css" media="screen,projection" />
@@ -22,6 +22,11 @@
 
         form input[type=text] {
             margin-bottom: 3px!important;
+        }
+
+        #buttons .waves-effect {
+            cursor: pointer;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -46,14 +51,19 @@
                         <div class="file-path-wrapper" style="display:none;">
                             <input class="file-path validate" type="text" placeholder="Upload files">
                         </div>
-                        <div class="hvr-bounce-to-right waves-effect waves-light" style="cursor:pointer;">
+                        <div class="hvr-bounce-to-right waves-effect waves-light">
                             <span>Upload</span>
                             <input id="file_path" type="file">
                         </div>
-                        <div class="hvr-bounce-to-right waves-effect waves-light" style="cursor:pointer;" onclick="updateCamera();render(cam, geometries, ctx);">
+                        <div class="hvr-bounce-to-right waves-effect waves-light" onclick="updateCamera();render(cam, geometries, ctx);">
                             Rerender
                         </div>
-
+                        <div class="hvr-bounce-to-right waves-effect waves-light" onclick="resetAll();">
+                            Reset All
+                        </div>
+                        <div class="hvr-bounce-to-right waves-effect waves-light" onclick="save();">
+                            Save Image
+                        </div>
                     </div>
                 </div>
                 <div id="info" class="row">
@@ -75,11 +85,17 @@
                             <input name="group2" type="radio" id="raster" />
                             <label for="raster">raster</label>
                         </p>
-                        <p>
+                        <!-- <p>
                             <input name="group2" type="radio" id="raytracing" />
                             <label for="raytracing">raytracing</label>
-                        </p>
+                        </p> -->
                         <div class="divider"></div>
+                        <p>canvas尺寸</p>
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <input id="canvas_size" type="text" value="600">
+                            </div>
+                        </div>
                         <p>相机坐标</p>
                         <div class="row">
                             <div class="input-field col s4">
@@ -119,13 +135,37 @@
                         <p>光源坐标</p>
                         <div class="row">
                             <div class="input-field col s4">
-                                <input id="light_x" type="text" value="400">
+                                <input id="light_x" type="text" value="0">
                             </div>
                             <div class="input-field col s4">
-                                <input id="light_y" type="text" value="400">
+                                <input id="light_y" type="text" value="-400">
                             </div>
                             <div class="input-field col s4">
-                                <input id="light_z" type="text" value="400">
+                                <input id="light_z" type="text" value="-400">
+                            </div>
+                        </div>
+                        <p>环境、漫射、镜面光系数</p>
+                        <div class="row">
+                            <div class="input-field col s4">
+                                <input id="light_amb" type="text" value="0.1">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="light_dif" type="text" value="0.5">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="light_spe" type="text" value="1.2">
+                            </div>
+                        </div>
+                        <p>光源颜色</p>
+                        <div class="row">
+                            <div class="input-field col s4">
+                                <input id="light_r" type="text" value="255">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="light_g" type="text" value="205">
+                            </div>
+                            <div class="input-field col s4">
+                                <input id="light_b" type="text" value="155">
                             </div>
                         </div>
                         <p>缩放</p>
@@ -186,10 +226,7 @@
         });
 
         function resetAll() {
-            ctx.save();
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, SIZE.width, SIZE.height);
-            ctx.restore();
+            ctx.clearRect(0, 0, SIZE.width, SIZE.height);
 
             geometries = [];
             cam = new Camera();
@@ -219,6 +256,11 @@
             geometries.push(geometry);
             updateCamera();
             render(cam, geometries, ctx);
+        }
+
+        function save() {
+            var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+            window.location.href = image;
         }
 
         $(window).resize(resizeInfoContainer);

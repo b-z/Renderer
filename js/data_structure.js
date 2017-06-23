@@ -25,7 +25,8 @@ Object.assign(Geometry.prototype, {
     drawRaster: function(camera, z_buffer, context) {
         var len = this.faces.length;
         for (var i = 0; i < len; i++) {
-            this.faces[i].drawRaster(camera, z_buffer, context, this.vertices);
+            var face = this.faces[i];
+            face.drawRaster(camera, z_buffer, context, this.vertices);
         }
     }
 });
@@ -76,6 +77,151 @@ Object.assign(Face.prototype, {
         context.stroke();
         context.restore();
     },
+    // intersect: function(orig, end) {
+    //     // orig: origin of the ray
+    //     // dir: direction of the ray
+    //     // v0, v1, v2: vertices of triangle
+    //     // t(out): weight of the intersection for the ray
+    //     // u(out), v(out): barycentric coordinate of intersection
+    //     var dir = end.clone();
+    //     dir.minus(orig);
+    //     dir.normalize();
+    //     var v0 = this.geometry.vertices[this.a].clone();
+    //     var v1 = this.geometry.vertices[this.b].clone();
+    //     var v2 = this.geometry.vertices[this.c].clone();
+    //     var t, u, v;
+    //     // E1
+    //     var E1 = v1.clone();
+    //     E1.minus(v0);
+    //     var E2 = v2.clone();
+    //     E2.minus(v0);
+    //     // P
+    //     var P = new Vector3D();
+    //     P.cross(dir, E2);
+    //
+    //     // determinant
+    //     var det = E1.multiplyVector(P);
+    //
+    //     // keep det > 0, modify T accordingly
+    //     var T = orig.clone();
+    //     T.minus(v0);
+    //     if (det <= 0) {
+    //         T.multiplyScalar(-1);
+    //         det *= -1;
+    //     }
+    //
+    //     // If determinant is near zero, ray lies in plane of triangle
+    //     if (det < 0.0001)
+    //         return false;
+    //
+    //     // Calculate u and make sure u <= 1
+    //     u = T.multiplyVector(P);
+    //     if (u < 0 || u > det)
+    //         return false;
+    //
+    //     // Q
+    //     var Q = new Vector3D();
+    //     Q.cross(T, E1);
+    //
+    //     // Calculate v and make sure u + v <= 1
+    //     v = dir.multiplyVector(Q);
+    //     if (v < 0 || u + v > det)
+    //         return false;
+    //
+    //     // Calculate t, scale parameters, ray intersects triangle
+    //     t = E2.multiplyVector(Q);
+    //
+    //     var fInvDet = 1 / det;
+    //     t *= fInvDet;
+    //     u *= fInvDet;
+    //     v *= fInvDet;
+    //
+    //     var ret = new Vector3D(
+    //         (1 - u - v) * v0.x + u * v1.x + v * v2.x,
+    //         (1 - u - v) * v0.y + u * v1.y + v * v2.y,
+    //         (1 - u - v) * v0.z + u * v1.z + v * v2.z
+    //     );
+    //
+    //     return ret;
+    // },
+    // intersect: function(start, end) {//a, b, c, backfaceCulling, optionalTarget) {
+    //     var backfaceCulling = false;
+    //     var pa = this.geometry.vertices[this.a].clone();
+    //     var pb = this.geometry.vertices[this.b].clone();
+    //     var pc = this.geometry.vertices[this.c].clone();
+    //     var edge1 = pb.clone();
+    //     edge1.minus(pa);
+    //     var edge2 = pc.clone();
+    //     edge2.minus(pa);
+    //     var normal = new Vector3D();
+    //     normal.cross(edge1, edge2);
+    //     // var normal = this.normal.clone();
+    //     var direction = end.clone();
+    //     direction.minus(start);
+    //     direction.normalize();
+    //     // Solve Q + t*D = b1*E1 + b2*E2 (Q = kDiff, D = ray direction,
+    //     // E1 = kEdge1, E2 = kEdge2, N = Cross(E1,E2)) by
+    //     //   |Dot(D,N)|*b1 = sign(Dot(D,N))*Dot(D,Cross(Q,E2))
+    //     //   |Dot(D,N)|*b2 = sign(Dot(D,N))*Dot(D,Cross(E1,Q))
+    //     //   |Dot(D,N)|*t = -sign(Dot(D,N))*Dot(Q,N)
+    //     // if (Math.random()<0.0001)console.log(end, start, direction, normal);
+    //     var DdN = direction.multiplyVector(normal);
+    //     var sign;
+    //     if (DdN > 0) {
+    //         if (backfaceCulling) return null;
+    //         sign = 1;
+    //     } else if (DdN < 0) {
+    //         sign = -1;
+    //         DdN = -DdN;
+    //     } else {
+    //         // console.log(DdN);
+    //         return null;
+    //     }
+    //     var diff = start.clone();
+    //     diff.minus(pa);
+    //     var tmp0 = new Vector3D();
+    //     tmp0.cross(diff, edge2);
+    //     var DdQxE2 = sign * direction.multiplyVector(tmp0);
+    //
+    //     // b1 < 0, no intersection
+    //     if (DdQxE2 < 0) {
+    //         // console.log(222);
+    //         return null;
+    //     }
+    //     var tmp = new Vector3D();
+    //     tmp.cross(edge1, diff);
+    //     var DdE1xQ = sign * direction.multiplyVector(tmp);
+    //     // b2 < 0, no intersection
+    //     if (DdE1xQ < 0) {
+    //         // console.log(333);
+    //
+    //         return null;
+    //     }
+    //     // b1+b2 > 1, no intersection
+    //     if (DdQxE2 + DdE1xQ > DdN) {
+    //         // console.log(444);
+    //
+    //         return null;
+    //     }
+    //     // Line intersects triangle, check if ray does.
+    //     var QdN = -sign * diff.multiplyVector(normal);
+    //     // t < 0, no intersection
+    //     if (QdN < 0) {
+    //         // console.log(555);
+    //
+    //         return null;
+    //     }
+    //     // Ray intersects triangle.
+    //     direction.multiplyScalar(QdN / DdN);
+    //     direction.plus(start);
+    //     return direction;
+    // },
+    intersection: function(start, end) {
+        var pa = this.geometry.vertices[this.a].clone();
+        var pb = this.geometry.vertices[this.b].clone();
+        var pc = this.geometry.vertices[this.c].clone();
+        // var sa = realToScreen()
+    },
     traverse: function(foo) {
         // 对每个点(光栅的)执行foo函数
         var minx = Math.round(Math.min(this.ca.x, this.cb.x, this.cc.x));
@@ -113,42 +259,54 @@ Object.assign(Face.prototype, {
     },
     drawRaster: function(camera, z_buffer, context, vertices) {
         var that = this;
-        this.traverse(function(v, p) {
-            var depth = computeDepth(camera, p);
-            if (v.x >= 0 && v.y >= 0 && v.x < SIZE.width && v.y < SIZE.height) {
-                if (z_buffer.data[v.x][v.y] > depth) {
-                    z_buffer.data[v.x][v.y] = depth;
+        requestAnimationFrame(function() {
+            that.traverse(function(v, p) {
+                var depth = computeDepth(camera, p);
+                if (v.x >= 0 && v.y >= 0 && v.x < SIZE.width && v.y < SIZE.height) {
+                    if (z_buffer.data[v.x][v.y] > depth) {
+                        z_buffer.data[v.x][v.y] = depth;
 
-                    var light_vector = light.pos.clone();
-                    light_vector.minus(p);
-                    light_vector.normalize();
+                        var light_vec = light.pos.clone();
+                        light_vec.minus(p);
+                        light_vec.normalize();
 
-                    var light_color = new Color(0, 0, 0);
-                    var ambient = light.color.clone();
-                    var diffuse = light.color.clone();
-                    diffuse.multiplyScalar(Math.abs(that.normal.multiplyVector(light_vector)));
+                        var light_color = new Color(0, 0, 0);
+                        var ambient = light.color.clone();
+                        var diffuse = light.color.clone();
+                        var nl = that.normal.multiplyVector(light_vec);
+                        diffuse.multiplyScalar(Math.max(0, nl));
+                        var specular = light.color.clone();
+                        var view_vec = camera.pos.clone();
+                        view_vec.minus(p);
+                        view_vec.normalize();
+                        view_vec.plus(light_vec);
+                        view_vec.normalize();
+                        specular.multiplyScalar(Math.max(0, view_vec.multiplyVector(that.normal)));
 
-                    light_color.add(ambient, 0.1);
-                    light_color.add(diffuse, 0.5);
-                    // light_color.add(specular, 0.4);
+                        light_color.add(ambient, light.ambient);
+                        light_color.add(diffuse, light.diffuse);
+                        if (nl > 0) {
+                            light_color.add(specular, light.specular);
+                        }
 
-                    var tmp = that.geometry.color;
-                    tmp = tmp.split(/[rgb(,)]+/);
-                    var color = new Color(parseInt(tmp[1]),
-                        parseInt(tmp[2]),
-                        parseInt(tmp[3])
-                    );
-                    color.multiply(light_color);
-                    context.save();
-                    context.fillStyle = color.toString();
-                    // var d = Math.floor((depth - 100000) / 100000 * 255);
-                    // if (d<0)d=0;
-                    // if (d>255)d=255;
-                    // context.fillStyle = 'rgb('+d+','+d+','+d+')';
-                    context.fillRect(v.x, 600-v.y, 1, 1);
-                    context.restore();
+                        var tmp = that.geometry.color;
+                        tmp = tmp.split(/[rgb(,)]+/);
+                        var color = new Color(parseInt(tmp[1]),
+                            parseInt(tmp[2]),
+                            parseInt(tmp[3])
+                        );
+                        color.multiply(light_color);
+                        context.save();
+                        context.fillStyle = color.toString();
+                        // var d = Math.floor((depth - 100000) / 100000 * 255);
+                        // if (d<0)d=0;
+                        // if (d>255)d=255;
+                        // context.fillStyle = 'rgb('+d+','+d+','+d+')';
+                        context.fillRect(v.x, v.y, 1, 1);
+                        context.restore();
+                    }
                 }
-            }
+            });
         });
     }
 });
@@ -359,6 +517,11 @@ function Color(r, g, b) {
 }
 
 Object.assign(Color.prototype, {
+    set: function(r, g, b) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    },
     add: function(c, t) {
         this.r += c.r * t;
         this.g += c.g * t;
